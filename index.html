@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivienda Distribuida 2.0 — White Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0e1a2b;
+    --bg-panel: #132539;
+    --bg-panel-2: #0c1826;
+    --line: #24405e;
+    --line-soft: #1a3049;
+    --blue: #6fb3dd;
+    --blue-dim: #4d7fa0;
+    --amber: #e7a53c;
+    --amber-dim: #a9762c;
+    --text: #dfe8f2;
+    --text-muted: #90a5bd;
+    --text-faint: #5d7288;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --radius: 3px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-attachment: fixed;
+    color:var(--text);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background: var(--amber-dim); color:#0e1a2b; }
+
+  a{ color:var(--blue); text-decoration-color: var(--blue-dim); }
+  a:hover{ color:var(--amber); }
+
+  /* Focus visibility */
+  a:focus-visible, button:focus-visible, .toc-link:focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:2px;
+  }
+
+  /* ---------- Progress bar ---------- */
+  #progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background: linear-gradient(90deg, var(--blue), var(--amber));
+    z-index:200; transition: width .1s linear;
+  }
+
+  /* ---------- Layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns: 300px minmax(0,1fr);
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    position:sticky; top:0; align-self:start;
+    height:100vh;
+    overflow-y:auto;
+    padding: 28px 20px 40px 32px;
+    border-right:1px solid var(--line);
+    background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  }
+  .sidebar::-webkit-scrollbar{ width:8px; }
+  .sidebar::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+
+  .brand{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .brand-title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:20px;
+    line-height:1.25;
+    color:var(--text);
+    margin:0 0 4px 0;
+  }
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-faint);
+    margin-bottom:22px;
+    line-height:1.5;
+  }
+
+  nav.toc{ display:flex; flex-direction:column; gap:1px; }
+  .toc-link{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    padding:7px 8px;
+    border-radius:var(--radius);
+    color:var(--text-muted);
+    font-family:var(--mono);
+    font-size:12.5px;
+    text-decoration:none;
+    border-left:2px solid transparent;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .toc-link .num{ color:var(--blue-dim); flex:0 0 22px; }
+  .toc-link:hover{ background:rgba(111,179,221,0.08); color:var(--text); }
+  .toc-link.active{
+    color:var(--amber);
+    border-left-color:var(--amber);
+    background:rgba(231,165,60,0.08);
+  }
+  .toc-link.active .num{ color:var(--amber); }
+
+  .sidebar-foot{
+    margin-top:24px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--text-faint);
+    letter-spacing:.05em;
+  }
+
+  /* mobile toc toggle */
+  #tocToggle{
+    display:none;
+  }
+
+  /* ---------- Main content ---------- */
+  main{
+    padding: 0 0 120px 0;
+    min-width:0;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding: 72px 64px 56px 64px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-eyebrow{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .hero-eyebrow::before{
+    content:''; width:26px; height:1px; background:var(--blue-dim);
+  }
+  h1.hero-title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(34px, 5vw, 56px);
+    line-height:1.05;
+    margin:0 0 18px 0;
+    letter-spacing:-0.01em;
+  }
+  h1.hero-title em{ font-style:normal; color:var(--amber); }
+  .hero-desc{
+    font-family:var(--serif);
+    font-size:19px;
+    color:var(--text-muted);
+    max-width:640px;
+    margin:0 0 30px 0;
+  }
+  .hero-meta{
+    display:flex; gap:28px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:11.5px; color:var(--text-faint);
+    padding-top:20px; border-top:1px solid var(--line-soft);
+  }
+  .hero-meta span b{ color:var(--text-muted); font-weight:500; }
+
+  /* ---------- Signature diagram ---------- */
+  .diagram-wrap{
+    margin-top:44px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:0;
+    border:1px solid var(--line);
+    background:var(--bg-panel-2);
+  }
+  .diagram-col{ padding:26px 30px; }
+  .diagram-col + .diagram-col{ border-left:1px solid var(--line); }
+  .diagram-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--text-faint); margin-bottom:14px;
+  }
+  svg.node-diagram{ width:100%; height:auto; display:block; }
+  .node-diagram text{ font-family:var(--mono); }
+  .node-diagram .lbl{ fill:var(--text-muted); font-size:11px; }
+  .node-diagram .lbl-strike{ fill:var(--text-faint); font-size:11px; text-decoration:line-through; }
+  .node-diagram .box-line{ stroke:var(--line); fill:none; }
+  .node-diagram .node-line{ stroke:var(--blue-dim); fill:none; }
+  .node-diagram .node-dot{ fill:var(--amber); }
+  .node-diagram .node-circle{ fill:var(--bg-panel); stroke:var(--blue); }
+  .node-diagram .hub{ fill:var(--bg-panel); stroke:var(--amber); }
+
+  @media (max-width: 720px){
+    .diagram-wrap{ grid-template-columns:1fr; }
+    .diagram-col + .diagram-col{ border-left:none; border-top:1px solid var(--line); }
+  }
+
+  /* ---------- Section styling ---------- */
+  section{
+    padding: 52px 64px;
+    border-bottom:1px solid var(--line-soft);
+    scroll-margin-top: 20px;
+  }
+  section:last-of-type{ border-bottom:none; }
+
+  .section-head{
+    display:flex; align-items:baseline; gap:16px; margin-bottom:26px;
+  }
+  .section-num{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--amber);
+    border:1px solid var(--amber-dim);
+    padding:3px 9px;
+    border-radius:var(--radius);
+    flex:0 0 auto;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(22px,3vw,30px);
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  h3{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:17px;
+    color:var(--blue);
+    margin:34px 0 12px 0;
+  }
+  p{ margin:0 0 16px 0; color:var(--text); max-width:78ch; }
+  .lede{ font-size:18px; color:var(--text-muted); }
+  strong{ color:#f2ede0; font-weight:600; }
+  blockquote{
+    margin: 20px 0; padding: 16px 22px;
+    border-left:2px solid var(--amber);
+    background: rgba(231,165,60,0.06);
+    font-style:italic;
+    color:var(--text);
+    max-width:74ch;
+  }
+  blockquote p{ margin:0; }
+
+  ul, ol{ padding-left:22px; max-width:76ch; }
+  li{ margin-bottom:6px; }
+  ol > li::marker{ color:var(--blue); font-family:var(--mono); }
+  ul > li::marker{ color:var(--amber); }
+
+  code{
+    font-family:var(--mono); font-size:.88em;
+    background:var(--bg-panel-2); border:1px solid var(--line);
+    padding:1px 5px; border-radius:3px; color:var(--blue);
+  }
+
+  /* ---------- Tables ---------- */
+  .table-wrap{
+    overflow-x:auto;
+    margin: 18px 0 26px 0;
+    border:1px solid var(--line);
+    background:var(--bg-panel-2);
+  }
+  table{ border-collapse:collapse; width:100%; min-width:520px; font-size:14.5px; }
+  thead th{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--amber);
+    text-align:left;
+    background:var(--bg-panel);
+    padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:12px 16px;
+    border-bottom:1px solid var(--line-soft);
+    color:var(--text-muted);
+    vertical-align:top;
+  }
+  tbody td:first-child{ color:var(--text); font-weight:500; }
+  tbody tr:hover td{ background:rgba(111,179,221,0.05); color:var(--text); }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.strong-total td, tr.total td{ color:var(--amber); }
+  tr.total-row td{ font-weight:600; color:var(--amber) !important; }
+
+  /* ---------- ASCII diagram block ---------- */
+  pre.ascii{
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--text-muted);
+    background:var(--bg-panel-2);
+    border:1px solid var(--line);
+    padding:22px 24px;
+    overflow-x:auto;
+    margin:20px 0 26px 0;
+  }
+
+  /* ---------- Callouts (risk/mitigation etc reuse tables mostly) ---------- */
+  .note{
+    display:flex; gap:14px;
+    border:1px solid var(--line);
+    background:var(--bg-panel-2);
+    padding:18px 20px;
+    margin: 22px 0;
+    max-width:78ch;
+  }
+  .note .tag{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--blue); flex:0 0 auto;
+    writing-mode:vertical-rl; text-orientation:mixed;
+  }
+  .note p{ margin:0; font-size:14.5px; color:var(--text-muted); }
+
+  .tag-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:14px; margin:20px 0;
+  }
+  .tag-card{
+    border:1px solid var(--line); background:var(--bg-panel-2);
+    padding:16px 18px;
+  }
+  .tag-card .k{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .tag-card .v{ font-family:var(--display); font-weight:600; color:var(--text); font-size:15px; }
+  .tag-card.good{ border-left:2px solid #6fbf8f; }
+  .tag-card.bad{ border-left:2px solid #d67b6b; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 48px 64px 80px 64px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+
+  /* ---------- Back to top ---------- */
+  #toTop{
+    position:fixed; right:28px; bottom:28px;
+    width:42px; height:42px;
+    border-radius:50%;
+    background:var(--bg-panel);
+    border:1px solid var(--blue-dim);
+    color:var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .2s ease, border-color .2s ease;
+    z-index:150;
+    font-family:var(--mono);
+    font-size:16px;
+  }
+  #toTop.show{ opacity:1; pointer-events:auto; }
+  #toTop:hover{ border-color:var(--amber); color:var(--amber); transform:translateY(-2px); }
+
+  /* ---------- Mobile ---------- */
+  .mobile-bar{ display:none; }
+
+  @media (max-width: 980px){
+    .shell{ grid-template-columns: 1fr; }
+    .sidebar{
+      position:fixed; top:0; left:0; height:100vh; width:82vw; max-width:320px;
+      transform:translateX(-100%);
+      transition:transform .25s ease;
+      z-index:190;
+      box-shadow: 20px 0 40px rgba(0,0,0,.4);
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .mobile-bar{
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:180;
+      background:var(--bg-panel); border-bottom:1px solid var(--line);
+      padding:14px 18px;
+    }
+    .mobile-bar .brand-title{ font-size:15px; margin:0; }
+    #tocToggle{
+      display:inline-flex; align-items:center; gap:8px;
+      background:none; border:1px solid var(--line); color:var(--text-muted);
+      font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+      padding:8px 12px; border-radius:var(--radius); cursor:pointer;
+    }
+    #tocToggle:hover{ border-color:var(--amber); color:var(--amber); }
+    .scrim{
+      display:none; position:fixed; inset:0; background:rgba(6,12,20,.6); z-index:185;
+    }
+    .scrim.show{ display:block; }
+    .hero{ padding: 40px 24px 36px 24px; }
+    section{ padding: 40px 22px; }
+    footer{ padding: 40px 22px 70px 22px; }
+    .diagram-wrap{ margin-top:32px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="mobile-bar">
+  <p class="brand-title">Vivienda Distribuida 2.0</p>
+  <button id="tocToggle" aria-expanded="false" aria-controls="sidebar">Índice ▾</button>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">White Paper · v2.0</div>
+    <p class="brand-title">Vivienda Distribuida</p>
+    <p class="brand-sub">De la propiedad de metros cuadrados a la suscripción de funciones vitales. Basado en el trabajo original de Rubén Sbarsky.</p>
+    <nav class="toc" id="toc">
+      <a class="toc-link" href="#s1"><span class="num">01</span>Resumen ejecutivo</a>
+      <a class="toc-link" href="#s2"><span class="num">02</span>Análisis del original</a>
+      <a class="toc-link" href="#s3"><span class="num">03</span>El problema real</a>
+      <a class="toc-link" href="#s4"><span class="num">04</span>Soluciones insuficientes</a>
+      <a class="toc-link" href="#s5"><span class="num">05</span>La propuesta 2.0</a>
+      <a class="toc-link" href="#s6"><span class="num">06</span>Arquitectura funcional</a>
+      <a class="toc-link" href="#s7"><span class="num">07</span>Energía</a>
+      <a class="toc-link" href="#s8"><span class="num">08</span>Agua y saneamiento</a>
+      <a class="toc-link" href="#s9"><span class="num">09</span>Marco legal</a>
+      <a class="toc-link" href="#s10"><span class="num">10</span>Implementación</a>
+      <a class="toc-link" href="#s11"><span class="num">11</span>Modelo económico</a>
+      <a class="toc-link" href="#s12"><span class="num">12</span>Materiales y recursos</a>
+      <a class="toc-link" href="#s13"><span class="num">13</span>Riesgos y mitigación</a>
+      <a class="toc-link" href="#s14"><span class="num">14</span>Alternativas</a>
+      <a class="toc-link" href="#s15"><span class="num">15</span>Perfil de usuario</a>
+      <a class="toc-link" href="#s16"><span class="num">16</span>Hoja de ruta</a>
+      <a class="toc-link" href="#s17"><span class="num">17</span>Oportunidades de negocio</a>
+      <a class="toc-link" href="#s18"><span class="num">18</span>Conclusiones</a>
+      <a class="toc-link" href="#s19"><span class="num">19</span>Recomendaciones</a>
+      <a class="toc-link" href="#s20"><span class="num">20</span>Bibliografía</a>
+    </nav>
+    <div class="sidebar-foot">20 CAPÍTULOS · LECTURA ≈ 28 MIN<br>ACTUALIZADO 2026</div>
+  </aside>
+
+  <main id="main">
+
+    <header class="hero">
+      <div class="hero-eyebrow">White paper · versión 2.0</div>
+      <h1 class="hero-title">Vivienda <em>Distribuida</em></h1>
+      <p class="hero-desc">De la propiedad de metros cuadrados a la suscripción de funciones vitales. Un análisis, corrección y ampliación del trabajo original de Rubén Sbarsky, con marco legal, cifras contrastadas y un plan de implementación real.</p>
+      <div class="hero-meta">
+        <span><b>Autor original</b> · Rubén Sbarsky</span>
+        <span><b>Ámbito</b> · Comunitat Valenciana, España</span>
+        <span><b>Estado</b> · Análisis + propuesta ampliada</span>
+      </div>
+
+      <div class="diagram-wrap">
+        <div class="diagram-col">
+          <div class="diagram-label">Modelo tradicional</div>
+          <svg class="node-diagram" viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama: vivienda tradicional agrupa todas las funciones bajo un mismo alquiler">
+            <rect class="box-line" x="20" y="20" width="280" height="170" rx="2"/>
+            <text class="lbl" x="34" y="42">DORMIR</text>
+            <text class="lbl" x="34" y="66">HIGIENE</text>
+            <text class="lbl" x="34" y="90">TRABAJAR</text>
+            <text class="lbl" x="34" y="114">COCINAR</text>
+            <text class="lbl" x="34" y="138">LAVAR ROPA</text>
+            <text class="lbl" x="34" y="162">ALMACENAR</text>
+            <text x="180" y="90" fill="#e7a53c" font-family="JetBrains Mono" font-size="11">1 ALQUILER</text>
+            <text x="180" y="106" fill="#90a5bd" font-family="JetBrains Mono" font-size="10">= 100% del coste</text>
+            <text x="180" y="122" fill="#90a5bd" font-family="JetBrains Mono" font-size="10">por 100% del paquete</text>
+          </svg>
+        </div>
+        <div class="diagram-col">
+          <div class="diagram-label">Vivienda distribuida</div>
+          <svg class="node-diagram" viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama: vivienda distribuida separa cada función en un nodo de servicio independiente">
+            <circle class="hub" cx="160" cy="105" r="26"/>
+            <text x="160" y="101" text-anchor="middle" fill="#e7a53c" font-family="JetBrains Mono" font-size="9">ESPACIO</text>
+            <text x="160" y="112" text-anchor="middle" fill="#e7a53c" font-family="JetBrains Mono" font-size="9">PRIVADO</text>
+
+            <line class="node-line" x1="160" y1="80" x2="160" y2="26"/>
+            <circle class="node-circle" cx="160" cy="18" r="14"/>
+            <text class="lbl" x="160" y="21" text-anchor="middle" font-size="8">GIMN.</text>
+
+            <line class="node-line" x1="184" y1="88" x2="268" y2="55"/>
+            <circle class="node-circle" cx="278" cy="50" r="14"/>
+            <text class="lbl" x="278" y="53" text-anchor="middle" font-size="8">COWK.</text>
+
+            <line class="node-line" x1="186" y1="122" x2="268" y2="160"/>
+            <circle class="node-circle" cx="278" cy="165" r="14"/>
+            <text class="lbl" x="278" y="168" text-anchor="middle" font-size="8">LAVAND.</text>
+
+            <line class="node-line" x1="160" y1="131" x2="160" y2="185"/>
+            <circle class="node-circle" cx="160" cy="193" r="14"/>
+            <text class="lbl" x="160" y="196" text-anchor="middle" font-size="8">ENERGÍA</text>
+
+            <line class="node-line" x1="136" y1="122" x2="54" y2="160"/>
+            <circle class="node-circle" cx="44" cy="165" r="14"/>
+            <text class="lbl" x="44" y="168" text-anchor="middle" font-size="8">AGUA</text>
+
+            <line class="node-line" x1="134" y1="88" x2="54" y2="55"/>
+            <circle class="node-circle" cx="44" cy="50" r="14"/>
+            <text class="lbl" x="44" y="53" text-anchor="middle" font-size="8">COCINA</text>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1 -->
+    <section id="s1">
+      <div class="section-head"><span class="section-num">01</span><h2>Resumen ejecutivo</h2></div>
+      <p class="lede">El documento original <em>Vivienda Distribuida</em> (Rubén Sbarsky, v1.0) plantea una idea legítima y valiosa: desagregar la vivienda en funciones —dormir, higiene, trabajo, cocina, lavandería, energía, agua— y resolver cada una con el servicio externo más eficiente, en lugar de pagar por un inmueble completo que las agrupa todas bajo un mismo alquiler.</p>
+      <p>La idea tiene mérito económico real. Pero, tal como está formulada, es un esquema conceptual, no un plan ejecutable. Le faltan tres piezas críticas que este documento añade:</p>
+      <ol>
+        <li><strong>Marco legal</strong>: el original no menciona qué tipo de inmueble puede alojar legalmente este modelo (vivienda vs. local vs. trastero), ni las implicaciones de empadronamiento, uso de suelo, seguros o convivencia con normativa de habitabilidad.</li>
+        <li><strong>Cifras verificadas</strong> y contrastadas con el mercado real, no solo estimaciones redondeadas.</li>
+        <li><strong>Un plan de implementación secuencial</strong>, con decisiones en orden, checklist de verificación y alternativas ante cada punto de fallo.</li>
+      </ol>
+      <blockquote><p>Este documento no rechaza la idea original: la fortalece, la corrige y la convierte en un plan operativo. Mantiene la tesis central —la vivienda como red de servicios en lugar de paquete cerrado— pero la sitúa dentro de los límites legales y prácticos reales.</p></blockquote>
+      <p><strong>Conclusión del análisis:</strong> el modelo es viable como estrategia de reducción de gasto para un perfil concreto de persona (soltera, sin hijos, con alta movilidad, trabajo remoto o flexible, tolerancia a la incomodidad organizativa), no como sustituto universal de la vivienda. Su verdadero valor no está en la vivienda física, sino en el modelo de negocio que podría construirse alrededor de ella.</p>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2">
+      <div class="section-head"><span class="section-num">02</span><h2>Análisis del documento original</h2></div>
+      <p>Antes de proponer una solución hay que diagnosticar bien el material de partida. Se compararon las dos versiones aportadas (el <code>.docx</code> y el <code>.txt</code>): son el mismo documento, uno resumido y otro extendido, sin diferencias de contenido sustanciales. Esto confirma que existe una única fuente de verdad.</p>
+
+      <h3>Fortalezas identificadas</h3>
+      <ul>
+        <li>El diagnóstico del problema —sobrepago por espacio infrautilizado— es correcto: en ciudades españolas, una persona que vive sola en un piso de 60-70 m² suele usar de forma intensiva menos del 40% de la superficie.</li>
+        <li>Sustituir la ducha doméstica por el gimnasio y la colada por lavandería autoservicio ya es práctica extendida entre nómadas digitales y "microliving" — no es especulativo.</li>
+        <li>El enfoque modular en energía (portátil / solar / híbrido) es técnicamente razonable y bien priorizado.</li>
+      </ul>
+
+      <h3>Vacíos y debilidades detectadas</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vacío en el original</th><th>Consecuencia si no se corrige</th></tr></thead>
+          <tbody>
+            <tr><td>No define qué tipo de inmueble aloja el "espacio privado"</td><td>El usuario podría alquilar un local sin saber que no puede dormir ni empadronarse allí legalmente</td></tr>
+            <tr><td>No trata el empadronamiento</td><td>Sin domicilio acreditado, se pierde acceso a sanidad, banca, contratos, censo electoral</td></tr>
+            <tr><td>No menciona seguros</td><td>Un incendio o fallo eléctrico sin seguro adecuado puede generar responsabilidad civil grave</td></tr>
+            <tr><td>No calcula el consumo eléctrico real antes de recomendar equipos</td><td>La "opción recomendada" es una afirmación no demostrada</td></tr>
+            <tr><td>El WC portátil se despacha en una frase, sin gestión de residuos</td><td>Verter aguas negras sin control es infracción medioambiental</td></tr>
+            <tr><td>No compara el modelo con alternativas reales del mercado</td><td>No se puede afirmar con rigor que el modelo "ahorra dinero"</td></tr>
+            <tr><td>No hay plan si un servicio externo falla</td><td>El modelo depende de terceros sin plan B</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Este documento corrige cada uno de estos puntos en los capítulos siguientes.</p>
+    </section>
+
+    <!-- 3 -->
+    <section id="s3">
+      <div class="section-head"><span class="section-num">03</span><h2>El problema real</h2></div>
+      <p>Despojado de la propuesta de solución, el problema de fondo es este:</p>
+      <blockquote><p>En España, y en gran parte de Europa, el coste de "tener una dirección con las cuatro paredes completas" ha crecido más rápido que los salarios, y ese coste se paga en bloque aunque la persona use solo una fracción de lo que ese bloque incluye.</p></blockquote>
+      <p>Datos de contexto (Comunitat Valenciana, zona de referencia):</p>
+      <ul>
+        <li>El precio del alquiler en la provincia de Valencia ha subido de forma sostenida, con especial presión en la ciudad de Valencia y su área metropolitana.</li>
+        <li>Una persona que vive sola paga el 100% de un alquiler diseñado, en superficie y equipamiento, para 2-4 personas.</li>
+        <li>El llamado <em>"impuesto a vivir solo"</em> (singles tax) es un fenómeno documentado: los costes fijos del hogar no se dividen entre convivientes.</li>
+      </ul>
+      <p><strong>El problema, por tanto, no es solo "la vivienda es cara".</strong> Es más preciso decir: el problema es la falta de granularidad en la oferta de vivienda. El mercado ofrece, casi en exclusiva, el paquete completo. No existe una oferta madura de "vivienda por funciones" que permita pagar solo por lo que se usa.</p>
+    </section>
+
+    <!-- 4 -->
+    <section id="s4">
+      <div class="section-head"><span class="section-num">04</span><h2>Por qué las soluciones actuales son insuficientes</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Solución actual</th><th>Por qué no resuelve el problema</th></tr></thead>
+          <tbody>
+            <tr><td>Piso compartido</td><td>Reduce coste pero introduce fricción social permanente y dependencia de la convivencia con desconocidos</td></tr>
+            <tr><td>Estudio pequeño</td><td>Incluye baño y cocina completos que se pagan aunque se usen poco; el precio por m² suele ser más alto que el de un piso grande</td></tr>
+            <tr><td>Coliving comercial</td><td>Resuelve parte del problema pero a precios premium, orientado a rentas medias-altas y en pocas ciudades</td></tr>
+            <tr><td>Vivir con la familia</td><td>No es una solución, es un aplazamiento del problema, con coste en autonomía personal</td></tr>
+            <tr><td>Vehículo habitable (van life)</td><td>Resuelve el coste de espacio pero traslada el problema a la habilitación legal del vehículo y el aparcamiento</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Ninguna de estas opciones separa explícitamente las funciones y permite optimizar cada una por separado. Es ahí donde la propuesta de Vivienda Distribuida aporta algo genuinamente distinto: no es "una vivienda más barata", es una arquitectura distinta del problema.</p>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5">
+      <div class="section-head"><span class="section-num">05</span><h2>La propuesta: Vivienda Distribuida 2.0</h2></div>
+      <p>Se mantiene la tesis central del documento original, reformulada con precisión operativa:</p>
+      <blockquote><p>La vivienda se descompone en seis funciones —refugio/descanso, higiene, trabajo, alimentación, lavado, energía+conectividad— y cada función se resuelve por separado, eligiendo la opción de menor coste total: coste económico + coste legal + coste de tiempo.</p></blockquote>
+      <p>La diferencia clave respecto al v1.0: aquí cada función se evalúa con tres filtros, no solo el económico.</p>
+      <div class="tag-grid">
+        <div class="tag-card"><div class="k">Filtro 01</div><div class="v">Legal</div></div>
+        <div class="tag-card"><div class="k">Filtro 02</div><div class="v">Resiliencia</div></div>
+        <div class="tag-card"><div class="k">Filtro 03</div><div class="v">Económico</div></div>
+      </div>
+      <p>Solo las funciones que pasan los tres filtros deben externalizarse. Las demás se quedan dentro del espacio privado.</p>
+    </section>
+
+    <!-- 6 -->
+    <section id="s6">
+      <div class="section-head"><span class="section-num">06</span><h2>Arquitectura funcional detallada</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Función</th><th>Solución propuesta</th><th>Requisito imprescindible</th><th>Alternativa</th></tr></thead>
+          <tbody>
+            <tr><td>Descanso + almacenaje</td><td>Habitación o estudio de uso residencial (no local comercial)</td><td>Contrato de alquiler con cédula de habitabilidad</td><td>Habitación en piso compartido con contrato individual</td></tr>
+            <tr><td>Higiene diaria</td><td>Abono a gimnasio con ducha, 24h a ser posible</td><td>Horario compatible y ducha incluida</td><td>Piscina/polideportivo municipal con abono de duchas</td></tr>
+            <tr><td>Trabajo</td><td>Biblioteca pública, Work Café o coworking gratuito</td><td>Wifi estable y enchufes disponibles</td><td>Cafetería con consumo mínimo, coworking puntual</td></tr>
+            <tr><td>Alimentación</td><td>Cocina compacta (inducción + microondas)</td><td>Ventilación mínima y punto eléctrico</td><td>Batch cooking + tuppers, restauración económica</td></tr>
+            <tr><td>Lavado de ropa</td><td>Lavandería autoservicio de barrio</td><td>Proximidad al espacio privado</td><td>Lavado a mano + tendedero plegable</td></tr>
+            <tr><td>Saneamiento nocturno</td><td>Baño propio si existe; si no, WC químico puntual</td><td>Gestión reglada de residuos</td><td>Uso exclusivo de baños públicos/gimnasio</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <div class="tag">Corrección clave</div>
+        <p>El "espacio privado" <strong>debe</strong> ser un inmueble de uso residencial legal —habitación, estudio o vivienda pequeña—, no un local, nave o trastero reconvertido de forma informal. Esta es la corrección más importante de todo el documento y se justifica en el Capítulo 9.</p>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7">
+      <div class="section-head"><span class="section-num">07</span><h2>Energía: comparativa y dimensionado real</h2></div>
+      <p>El documento original recomienda un sistema híbrido sin mostrar el cálculo que lo justifica. Aquí se completa ese cálculo.</p>
+      <h3>Paso 1 — Consumo real estimado (estudio pequeño, sin A/C ni cocina de gran potencia)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Aparato</th><th>Potencia</th><th>Horas/día</th><th>Consumo diario</th></tr></thead>
+          <tbody>
+            <tr><td>Portátil de trabajo</td><td>65 W</td><td>8 h</td><td>520 Wh</td></tr>
+            <tr><td>Iluminación LED</td><td>15 W</td><td>5 h</td><td>75 Wh</td></tr>
+            <tr><td>Router wifi</td><td>10 W</td><td>24 h</td><td>240 Wh</td></tr>
+            <tr><td>Nevera pequeña</td><td>45 W (prom.)</td><td>24 h</td><td>1.080 Wh</td></tr>
+            <tr><td>Inducción / hervidor</td><td>1.200 W</td><td>0,5 h</td><td>600 Wh</td></tr>
+            <tr><td>Carga móvil y varios</td><td>10 W</td><td>3 h</td><td>30 Wh</td></tr>
+            <tr class="total-row"><td>Total aproximado</td><td></td><td></td><td>≈ 2.545 Wh/día (~2,5 kWh)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Paso 2 — Comparativa de las tres opciones con ese consumo</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Opción</th><th>Capacidad necesaria</th><th>Coste aprox.</th><th>Cuándo tiene sentido</th></tr></thead>
+          <tbody>
+            <tr><td>A · Estación portátil sola</td><td>1.500-2.000 Wh, recarga 1-2×/semana</td><td>800-1.400 €</td><td>Si hay acceso ocasional a un enchufe</td></tr>
+            <tr><td>B · Solar autónomo puro</td><td>2-3 paneles 400 W + batería LiFePO₄ 2-3 kWh</td><td>1.800-2.800 €</td><td>Solo con lugar fijo y acceso a exterior</td></tr>
+            <tr><td>C · Híbrido (recomendado)</td><td>Estación 1.500-2.000 Wh + panel plegable 200-400 W</td><td>1.200-1.900 €</td><td>Movilidad + fiabilidad — el perfil de este documento</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <div class="tag">Corrección</div>
+        <p>En un espacio privado con contrato de alquiler convencional, lo más razonable económica y legalmente es usar la electricidad de la vivienda y reservar el sistema solar/portátil como <strong>respaldo de movilidad</strong>, no como sustituto principal de la red. Presentarlo como sustituto total de la factura eléctrica sobredimensiona una solución para un problema que, según el propio capítulo económico del original, no es el dominante (20-40 €/mes).</p>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section id="s8">
+      <div class="section-head"><span class="section-num">08</span><h2>Agua y saneamiento</h2></div>
+      <p>Se mantiene la lógica del original —reducir consumo doméstico externalizando la higiene al gimnasio— pero se corrige el punto más delicado: el WC portátil.</p>
+      <ul>
+        <li>Un WC químico o de cassette tipo camper es legal para uso personal, pero <strong>genera aguas negras que son residuo peligroso</strong> si no se gestionan correctamente.</li>
+        <li>Verterlas por un desagüe doméstico convencional puede estar prohibido según ordenanza municipal; verterlas en la naturaleza es infracción administrativa y, en algunos casos, delito ambiental.</li>
+        <li><strong>Gestión correcta:</strong> vaciado en puntos habilitados para autocaravanas, muy comunes en la Comunitat Valenciana, nunca en inodoros convencionales sin verificar antes con la comunidad de vecinos.</li>
+        <li><strong>Recomendación:</strong> si el espacio privado ya incluye baño (el caso más habitual en una habitación o estudio de alquiler), el WC portátil es innecesario.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="s9">
+      <div class="section-head"><span class="section-num">09</span><h2>Marco legal y normativo</h2></div>
+      <p class="lede">El capítulo que el documento original omite casi por completo y que determina si el modelo es aplicable sin riesgo.</p>
+
+      <h3>9.1 · Tipo de inmueble</h3>
+      <p>El "espacio privado" debe ser una vivienda o habitación con uso residencial reconocido (cédula de habitabilidad o licencia de primera ocupación). Un local comercial, nave o trastero <strong>no está habilitado legalmente para residir</strong>. Usarlo así expone a orden de cese de actividad, imposibilidad de empadronarse y falta de cobertura de seguro.</p>
+
+      <h3>9.2 · Empadronamiento</h3>
+      <p>Es un derecho y una obligación de toda persona que resida de forma continuada en un municipio, independientemente del tamaño de la vivienda. Se puede empadronar en una habitación alquilada con autorización del titular del contrato. Sin empadronamiento se pierde o dificulta el acceso a tarjeta sanitaria, escolarización, censo electoral y muchos trámites bancarios y de extranjería.</p>
+
+      <h3>9.3 · Seguros</h3>
+      <p>Un seguro de hogar o de inquilino de bajo coste es recomendable incluso en un espacio pequeño, y suele cubrir la responsabilidad civil derivada de equipos eléctricos, baterías de litio incluidas. Coste típico: 5-10 €/mes.</p>
+
+      <h3>9.4 · Normativa eléctrica</h3>
+      <p>Las estaciones de energía portátil y kits solares plug-in de baja potencia no requieren instalación reglada si no vierten excedentes a la red del edificio. Conectarlos para "compensar recibo" sí puede requerir autorización de la comunidad de propietarios y alta como autoconsumo. Para el uso descrito aquí —carga de dispositivos propios— no se necesita trámite adicional.</p>
+
+      <h3>9.5 · Contratos con terceros</h3>
+      <p>Ninguno requiere trámite especial, pero conviene verificar la letra pequeña de la cuota del gimnasio antes de depender de él como única solución de higiene.</p>
+    </section>
+
+    <!-- 10 -->
+    <section id="s10">
+      <div class="section-head"><span class="section-num">10</span><h2>Implementación paso a paso</h2></div>
+
+      <h3>Fase 0 · Diagnóstico personal (1 semana)</h3>
+      <ol>
+        <li>Registrar durante 7 días el uso real de cada espacio de la vivienda actual.</li>
+        <li>Calcular el presupuesto máximo disponible y compararlo con el Capítulo 11.</li>
+      </ol>
+
+      <h3>Fase 1 · Espacio privado (semanas 1-3)</h3>
+      <ol start="3">
+        <li>Buscar habitación o estudio con contrato legal, cerca de gimnasio, lavandería y transporte público.</li>
+        <li>Firmar contrato, dar de alta suministros, tramitar el empadronamiento.</li>
+        <li>Contratar seguro de inquilino/contenido de bajo coste.</li>
+      </ol>
+
+      <h3>Fase 2-4 · Higiene, trabajo, lavandería (semanas 2-3, en paralelo)</h3>
+      <ol start="6">
+        <li>Comparar gimnasios cercanos por horario, precio y calidad de duchas.</li>
+        <li>Localizar biblioteca, Work Café o coworking gratuito más cercano.</li>
+        <li>Identificar la lavandería autoservicio más cercana y su coste.</li>
+      </ol>
+
+      <h3>Fase 5 · Energía (semanas 3-4)</h3>
+      <ol start="9">
+        <li>Calcular el consumo real siguiendo la tabla del Capítulo 7.</li>
+        <li>Comprar únicamente el equipo necesario según ese cálculo.</li>
+      </ol>
+
+      <h3>Fase 6-7 · Rodaje y consolidación (mes 2 en adelante)</h3>
+      <ol start="11">
+        <li>Vivir el sistema completo un mes, registrando gasto real frente al estimado.</li>
+        <li>Ajustar: cambiar de gimnasio, renegociar alquiler, revisar equipo energético.</li>
+        <li>Automatizar pagos y fijar rutinas horarias fijas para reducir la carga mental diaria.</li>
+      </ol>
+    </section>
+
+    <!-- 11 -->
+    <section id="s11">
+      <div class="section-head"><span class="section-num">11</span><h2>Modelo económico detallado</h2></div>
+      <p>El original estimaba 355-435 €/mes sin comparación de mercado. Aquí se añade esa comparación, con rangos ajustados a precios 2025-2026 en una ciudad media/grande española.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Concepto</th><th>Vivienda Distribuida</th></tr></thead>
+          <tbody>
+            <tr><td>Espacio privado</td><td>280-380 €/mes</td></tr>
+            <tr><td>Gimnasio con ducha</td><td>25-40 €/mes</td></tr>
+            <tr><td>Electricidad</td><td>25-45 €/mes</td></tr>
+            <tr><td>Agua</td><td>10-20 €/mes</td></tr>
+            <tr><td>Lavandería</td><td>15-25 €/mes</td></tr>
+            <tr><td>Internet / datos</td><td>15-25 €/mes</td></tr>
+            <tr><td>Seguro de inquilino</td><td>5-10 €/mes</td></tr>
+            <tr><td>Consumibles e imprevistos</td><td>10-15 €/mes</td></tr>
+            <tr class="total-row"><td>Total Vivienda Distribuida</td><td>≈ 385-560 €/mes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Alternativa de mercado</th><th>Rango mensual</th></tr></thead>
+          <tbody>
+            <tr><td>Estudio completo estándar (misma ciudad)</td><td>500-750 €/mes</td></tr>
+            <tr><td>Habitación en piso compartido sin optimizar</td><td>350-500 €/mes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Lectura correcta del modelo:</strong> el ahorro real frente a un estudio convencional puede rondar el <strong style="color:var(--amber)">15-25%</strong>, no tan drástico como sugería el original, porque parte del ahorro de espacio se compensa con el gasto añadido en gimnasio, lavandería y coworking. La ganancia principal no es solo económica: es de <strong>flexibilidad</strong>. Frente a una habitación en piso compartido sin optimizar, el ahorro es menor o puede no existir — un matiz que el original no contemplaba.</p>
+    </section>
+
+    <!-- 12 -->
+    <section id="s12">
+      <div class="section-head"><span class="section-num">12</span><h2>Materiales, herramientas y recursos</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Categoría</th><th>Elementos</th><th>Coste orientativo</th></tr></thead>
+          <tbody>
+            <tr><td>Cocina compacta</td><td>Inducción 1-2 fuegos, microondas, nevera pequeña, menaje</td><td>150-350 €</td></tr>
+            <tr><td>Energía (híbrido)</td><td>Estación portátil 1.000-2.000 Wh + panel plegable 200 W</td><td>900-1.500 €</td></tr>
+            <tr><td>Almacenaje</td><td>Organizadores modulares, cama con cajones, estanterías</td><td>150-300 €</td></tr>
+            <tr><td>Movilidad de higiene</td><td>Neceser, chanclas antideslizantes, toalla secado rápido</td><td>30-50 €</td></tr>
+            <tr><td>Lavandería</td><td>Bolsa de transporte, detergente en dosis</td><td>20 €</td></tr>
+            <tr><td>Documentación</td><td>Seguro de inquilino anual, gestión de empadronamiento</td><td>60-120 €/año</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section id="s13">
+      <div class="section-head"><span class="section-num">13</span><h2>Riesgos, limitaciones y mitigación</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Riesgo</th><th>Probabilidad</th><th>Impacto</th><th>Mitigación</th></tr></thead>
+          <tbody>
+            <tr><td>El gimnasio cierra o cambia horario</td><td>Media</td><td>Alto</td><td>Tener identificado un gimnasio/polideportivo alternativo</td></tr>
+            <tr><td>Batería/estación de energía falla</td><td>Baja-media</td><td>Medio</td><td>Marca con garantía ≥ 2 años; red eléctrica como respaldo real</td></tr>
+            <tr><td>Casero prohíbe uso "no habitual"</td><td>Baja si es legal</td><td>Alto si informal</td><td>Alquilar siempre bajo contrato de arrendamiento residencial</td></tr>
+            <tr><td>Aislamiento social</td><td>Media</td><td>Medio-alto</td><td>Mantener vínculos sociales activos fuera del sistema</td></tr>
+            <tr><td>Cansancio por logística diaria</td><td>Media-alta</td><td>Medio</td><td>Servicios dentro de un radio caminable de 10-15 min</td></tr>
+            <tr><td>Vertido irregular de aguas negras</td><td>Baja si se gestiona bien</td><td>Alto</td><td>Solo puntos de vaciado habilitados para autocaravanas</td></tr>
+            <tr><td>Imprevistos de salud</td><td>Baja</td><td>Alto</td><td>Plan de contingencia y presupuesto de emergencia de 1 mes extra</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section id="s14">
+      <div class="section-head"><span class="section-num">14</span><h2>Alternativas si una parte del sistema falla</h2></div>
+      <ul>
+        <li><strong>Sin gimnasio accesible</strong> → piscina o polideportivo municipal, con duchas a precio muy bajo o gratuito.</li>
+        <li><strong>Sin coworking gratuito viable</strong> → cafeterías con tarifa plana café + wifi, o bonos de coworking por horas.</li>
+        <li><strong>Sistema solar no rentable</strong> (poca luz, sin terraza) → prescindir de él; nunca fue la partida más significativa del modelo.</li>
+        <li><strong>No se encuentra habitación con buen contrato</strong> → coliving comercial como paso intermedio, aunque algo más caro.</li>
+        <li><strong>Logística agotadora</strong> → reducir funciones externalizadas: aplicar el modelo de forma parcial en vez de total.</li>
+      </ul>
+    </section>
+
+    <!-- 15 -->
+    <section id="s15">
+      <div class="section-head"><span class="section-num">15</span><h2>Perfil de usuario</h2></div>
+      <div class="tag-grid">
+        <div class="tag-card good"><div class="k">Encaja bien con</div><div class="v">Sin cargas familiares</div></div>
+        <div class="tag-card good"><div class="k">Encaja bien con</div><div class="v">Trabajo remoto / híbrido</div></div>
+        <div class="tag-card good"><div class="k">Encaja bien con</div><div class="v">Buena autonomía física</div></div>
+        <div class="tag-card good"><div class="k">Encaja bien con</div><div class="v">Estancias de meses a 2-3 años</div></div>
+        <div class="tag-card bad"><div class="k">No encaja con</div><div class="v">Familias con menores</div></div>
+        <div class="tag-card bad"><div class="k">No encaja con</div><div class="v">Movilidad reducida</div></div>
+        <div class="tag-card bad"><div class="k">No encaja con</div><div class="v">Necesidad de privacidad total</div></div>
+        <div class="tag-card bad"><div class="k">No encaja con</div><div class="v">Zonas de baja densidad de servicios</div></div>
+      </div>
+    </section>
+
+    <!-- 16 -->
+    <section id="s16">
+      <div class="section-head"><span class="section-num">16</span><h2>Hoja de ruta futura</h2></div>
+      <ol>
+        <li><strong>Corto plazo (0-6 meses):</strong> validar el modelo a nivel individual siguiendo el Capítulo 10, con seguimiento mensual de gasto real.</li>
+        <li><strong>Medio plazo (6-18 meses):</strong> documentar el caso de uso propio como plantilla replicable — hoja de cálculo de gasto, checklist legal, mapa de servicios de la ciudad.</li>
+        <li><strong>Largo plazo (18+ meses):</strong> explorar si existe suficiente demanda local para convertir el modelo en una oferta comercial empaquetada, en la que un operador ofrezca las seis funciones bajo una única cuota y un único contrato.</li>
+      </ol>
+    </section>
+
+    <!-- 17 -->
+    <section id="s17">
+      <div class="section-head"><span class="section-num">17</span><h2>Oportunidades de negocio e innovación</h2></div>
+      <p>El documento original apunta esta idea en su última sección, sin desarrollarla. Se amplía aquí porque es, probablemente, el mayor valor latente de todo el planteamiento.</p>
+      <h3>1 · Membresía única "todo incluido"</h3>
+      <p>Un operador que agregue habitación/estudio + red de gimnasios + coworking + lavandería + conectividad en una sola cuota y un solo contrato, dirigido a profesionales móviles y estudiantes de posgrado.</p>
+      <h3>2 · App de gestión del "hogar distribuido"</h3>
+      <p>Herramienta que centralice reservas de lavandería, control de consumo energético del kit portátil y un panel de gasto comparado con el equivalente de mercado.</p>
+      <h3>3 · Kits preconfigurados</h3>
+      <p>Paquete físico —estación de energía + panel plegable + neceser + organizadores— vendido como producto único.</p>
+      <h3>4 · Alianzas B2B</h3>
+      <p>Tarifas de grupo negociadas con cadenas de gimnasios y lavanderías, generando ingresos de intermediación.</p>
+      <h3>5 · Certificación "Espacio apto para Vivienda Distribuida"</h3>
+      <p>Sello que verifique que una habitación/estudio cumple los requisitos legales del Capítulo 9, diferenciando la oferta en portales inmobiliarios.</p>
+    </section>
+
+    <!-- 18 -->
+    <section id="s18">
+      <div class="section-head"><span class="section-num">18</span><h2>Conclusiones</h2></div>
+      <ul>
+        <li>La idea central del original —pensar la vivienda como conjunto de funciones, no como paquete fijo— es una intuición correcta y con recorrido real.</li>
+        <li>Su mayor debilidad no era conceptual, sino de ejecución: faltaba marco legal, cifras verificadas y un plan con puntos de fallo previstos.</li>
+        <li>Bien ejecutado, el modelo genera un ahorro moderado pero real (≈15-25% frente a un estudio convencional) y, sobre todo, una ganancia significativa en flexibilidad contractual.</li>
+        <li>No es universal: exige un perfil de usuario concreto y un contexto urbano con buena densidad de servicios.</li>
+        <li>El mayor potencial a futuro está en que alguien lo empaquete como servicio, resolviendo de raíz el problema legal y logístico que hoy recae sobre el usuario individual.</li>
+      </ul>
+    </section>
+
+    <!-- 19 -->
+    <section id="s19">
+      <div class="section-head"><span class="section-num">19</span><h2>Recomendaciones finales</h2></div>
+      <ol>
+        <li>Empezar siempre por el espacio privado legal — habitación o estudio con contrato residencial —, nunca por un local informal.</li>
+        <li>Calcular el consumo eléctrico real antes de comprar equipo solar o batería portátil.</li>
+        <li>Tratar el WC portátil como solución de última instancia, no como pieza central.</li>
+        <li>Elegir todos los servicios externos dentro de un radio caminable.</li>
+        <li>Empadronarse siempre, sea cual sea el tamaño del espacio.</li>
+        <li>Contratar un seguro de inquilino de bajo coste desde el primer día.</li>
+        <li>Probar el modelo un mes completo antes de comprometerse a equipo caro.</li>
+        <li>Si el objetivo es escalar, orientarlo hacia un modelo de negocio de membresía (Cap. 17).</li>
+      </ol>
+    </section>
+
+    <!-- 20 -->
+    <section id="s20">
+      <div class="section-head"><span class="section-num">20</span><h2>Bibliografía y referencias</h2></div>
+      <ul>
+        <li>Documento base: <em>Vivienda Distribuida — Un nuevo paradigma para la vivienda unipersonal en el siglo XXI</em>, White Paper v1.0, Rubén Sbarsky.</li>
+        <li>Conocimiento general contrastado sobre empadronamiento en España: normativa municipal del padrón de habitantes (Ley 7/1985 Reguladora de las Bases del Régimen Local y desarrollo reglamentario).</li>
+        <li>Referencias de mercado sobre precios de alquiler y coliving: datos generales de mercado inmobiliario español, rangos orientativos 2025-2026, a contrastar por el usuario en el momento de la implementación.</li>
+        <li>Buenas prácticas de dimensionado de energía portátil/solar: especificaciones estándar de fabricantes del sector (EcoFlow, Bluetti, Jackery, Anker).</li>
+      </ul>
+      <div class="note">
+        <div class="tag">Nota</div>
+        <p>Las cifras de precio de mercado son rangos orientativos a fecha de elaboración de este documento. Antes de tomar decisiones económicas, verifica precios actualizados en tu zona concreta de residencia.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>Vivienda Distribuida 2.0 — White Paper</span>
+      <span>Fin del documento</span>
+    </footer>
+
+  </main>
+</div>
+
+<button id="toTop" aria-label="Volver arriba">↑</button>
+
+<script>
+  // Progress bar
+  const progress = document.getElementById('progress');
+  function updateProgress(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop;
+    const max = h.scrollHeight - h.clientHeight;
+    progress.style.width = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+  }
+  document.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // Back to top
+  const toTop = document.getElementById('toTop');
+  document.addEventListener('scroll', () => {
+    toTop.classList.toggle('show', window.scrollY > 600);
+  }, { passive: true });
+  toTop.addEventListener('click', () => window.scrollTo({ top:0, behavior: 'smooth' }));
+
+  // Scrollspy
+  const links = Array.from(document.querySelectorAll('.toc-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const idx = sections.indexOf(entry.target);
+      if (idx === -1) return;
+      if (entry.isIntersecting){
+        links.forEach(l => l.classList.remove('active'));
+        links[idx].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -75% 0px', threshold: 0 });
+  sections.forEach(s => s && spy.observe(s));
+
+  // Mobile sidebar toggle
+  const sidebar = document.getElementById('sidebar');
+  const tocToggle = document.getElementById('tocToggle');
+  const scrim = document.getElementById('scrim');
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    scrim.classList.remove('show');
+    tocToggle.setAttribute('aria-expanded','false');
+  }
+  tocToggle.addEventListener('click', () => {
+    const willOpen = !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', willOpen);
+    scrim.classList.toggle('show', willOpen);
+    tocToggle.setAttribute('aria-expanded', String(willOpen));
+  });
+  scrim.addEventListener('click', closeSidebar);
+  links.forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 980) closeSidebar(); }));
+</script>
+
+</body>
+</html>
